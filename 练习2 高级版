@@ -1,0 +1,22 @@
+让AI更加智能，猜的次数少于100次
+import random
+guess=int(input('输入一个1-100的数让电脑猜'))
+computerguess=random.randrange(1,101)
+guesstime=0
+guess_all=[]
+guess_all.extend(range(computerguess,computerguess+1))
+allnumber=list(range(1,101))
+while computerguess!=guess:
+    guesstime=guesstime+1
+    print('猜错了' + str(guesstime) +'次')
+    print('电脑猜的答案是：'+str(computerguess))
+    print(allnumber)
+    print(guess_all)
+    leftnumber = list(set(allnumber) ^ set(guess_all))#列表相减要用差集
+    computerguess = random.choice(leftnumber)
+    guess_all.extend(range(computerguess,computerguess+1))
+while computerguess==guess:
+    print('电脑猜对了')
+    print('一共猜了'+str(guesstime)+'次')
+    #print(guess_all)
+    break
