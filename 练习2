@@ -1,0 +1,14 @@
+功能描述：用户输入一个单位以内的数字，AI要用最少的次数猜中，并且显示出猜的次数和数字。
+import random
+guess=int(input('输入一个1-100的数让电脑猜'))
+computerguess=random.randrange(1,101)
+guesstime=0
+while computerguess!=guess:
+    guesstime=guesstime+1
+    print('猜错了' + str(guesstime) +'次')
+    print('电脑猜的答案是：'+str(computerguess))
+    computerguess = random.randrange(1, 101)
+while computerguess==guess:
+    print('电脑猜对了')
+    print('一共猜了'+str(guesstime)+'次')
+    break
