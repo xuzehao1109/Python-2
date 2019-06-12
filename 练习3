@@ -1,0 +1,18 @@
+import time
+t=time.localtime()
+t=list(t)
+print('年份是：'+str(t[0]))
+print('日期是：'+str(t[1])+'月'+str(t[2])+'日')
+print('时间是：'+str(t[3])+':'+str(t[4]))
+notime='24','1','2','3','4','5','6'
+def timelooker():
+    t = time.localtime()
+    t = list(t)
+    if str(t[3]) != notime:
+        if str(t[4]) == '0' and str(t[5]) == '00':
+            print("\a")#\a为闹铃
+        if str(t[4]) == '30' and str(t[5]) == '00':
+            print("\a\a")
+while True:
+    timelooker()
+    continue
