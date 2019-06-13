@@ -1,0 +1,10 @@
+import re
+with open('text.txt','r') as f :
+    p=f.read()
+    print(p)
+with open('text.txt','w+') as ff:
+    p = re.sub('(滚)', '*', p)
+    p=re.sub('(混蛋)','*',p)
+    p = re.sub('(神)', '*', p)
+    print(p)
+    ff.write(p)
