@@ -1,0 +1,83 @@
+print('欢迎来到格斗志世界，这里是一个回合制的格斗世界')
+gamer=input('请输入玩家您的姓名:')
+global hp
+hp=100
+fightlost=5
+fightlost_hard=10
+water=int(5)
+food=int(15)
+money=0
+lucky=500
+class fight():
+    def __int__(self,hp):
+        self.hp=hp
+    def fight_easy(self):
+        global hp
+        hp=self.hp=hp-int(fightlost)
+        print(gamer+'战斗打响，你的生命受到损伤\n现在你的好hp是：'+str(self.hp))
+    def fight_hard(self):
+        global hp
+        hp=self.hp=hp-int(fightlost_hard)
+        print(gamer+'战斗打响，你的生命受到损伤\n现在你的hp是：' + str(self.hp))
+    def run(self):
+        print('你逃跑了')
+class recover():
+    def __int__(self,hp):
+        self.hp=hp
+    def have_water(self):
+        global hp
+        global money
+        hp=self.hp=hp+int(water)
+        money-=5
+        print(gamer+'你喝下生命之水，生命值得到回复\n现在你的hp是：'+str(self.hp))
+        print('你现在的金币是：'+str(money))
+
+    def have_food(self):
+        global hp
+        global money
+        money-=10
+        hp=self.hp = int(hp) + int(food)
+        print(gamer+'你吃下生命之果，生命值得到回复\n现在你的hp是：' + str(self.hp))
+        print('你现在的金币是：' + str(money))
+pp = recover()
+p = fight()
+while True:
+
+    move1=input('你现在走在世界大道上\n'
+                '你看到前方有一个挑战者出现\n'
+                '你想怎么做：\n'
+                '1:激战\n'
+                '2:恢复\n'
+                '3:逃跑\n')
+    if move1=='1':
+        move2=input('请选择你的招数：\n'
+              '1：小招\n'
+              '2：大招\n')
+        if move2=='1':
+            p.fight_easy()
+        if move2=='2':
+            p.fight_hard()
+    if move1=='2':
+        move3=input('请选择你要恢复的属性：\n'
+              '1：生命值\n'
+              '2：护甲值\n')
+        if move3=='1':
+            move4=input('选择你要吃的物品：\n'
+                  '1:生命之水     2：生命之果')
+            if move4=='1':
+                pp.have_water()
+            if move4=='2':
+                pp.have_food()
+        if move3=='2':
+            fightlost-=1
+            if fightlost<0:
+                fightlost=10
+                print('由于你一直提升护甲，导致护甲崩溃，现在护甲为0')
+            fightlost_hard-=1
+            if fightlost_hard<0:
+
+                fightlost_hard = 15
+                print('由于你一直提升护甲，导致护甲崩溃，现在护甲为0')
+    if move1=='3':
+        print('你逃跑了，人品值-100')
+        lucky-=100
