@@ -1,0 +1,142 @@
+import random
+from t6 import *
+def star(self):
+    word='{:*^40}'.format(self)
+    print(word)
+star('*')
+print('欢迎来到格斗志世界，这里是一个回合制的格斗世界')
+gamer=input('请输入玩家您的姓名:')
+star('游戏开始')
+hp=100
+star('您的初始生命为'+str(hp))
+star('您的初始护甲为'+str(armor))
+star('您的初始金钱为'+str(money))
+star('您的初始速度为'+str(speed))
+star('您的初始坐骑--小秃驴')
+star(reward_donkey)
+
+
+class Foe():
+    def foe(self):
+        global foe
+        foe = ['老虎', '狮子', '大象', '功夫熊猫', '泰迪']
+        foe = random.choice(foe)
+        return foe
+class foe_hp_and_attack():
+    def foe_hp(self):
+        self.name = foe
+        self.hp_foe = 1
+        self.attack = 2
+        if self.name == '功夫熊猫':
+            self.hp_foe = 200
+            self.attack = 5
+
+        if self.name == '狮子':
+            self.hp_foe = 120
+            self.attack = 10
+
+        if self.name == '老虎':
+            self.hp_foe = 110
+            self.attack = 11
+
+        if self.name == '大象':
+            self.hp_foe = 250
+            self.attack = 3
+
+        if self.name == '泰迪':
+            self.hp_foe = 60
+            self.attack = 7
+class Fight():
+    def __int__(self,hp):
+        self.hp=hp
+    def fight(self):
+        global hp
+        foe_name=foe_hp_and_attack()
+        foe_name.foe_hp()
+        hp=self.hp=hp-int(foe_name.attack)
+        print(gamer+'战斗打响，你的生命受到损伤\n现在你的hp是：'+str(self.hp))
+    def run(self):
+        print('你逃跑了')
+class recover():
+    def __int__(self,hp):
+        self.hp=hp
+    def have_water(self):
+        global hp
+        global money
+        hp=self.hp=hp+int(water)
+        money-=5
+        print(gamer+'你喝下生命之水，生命值得到回复\n现在你的hp是：'+str(self.hp))
+        print('你现在的金币是：'+str(money))
+
+    def have_food(self):
+        global hp
+        global money
+        money-=10
+        hp=self.hp = int(hp) + int(food)
+        print(gamer+'你吃下生命之果，生命值得到回复\n现在你的hp是：' + str(self.hp))
+        print('你现在的金币是：' + str(money))
+
+
+pp = recover()
+p = Fight()
+star('*')
+print('你现在走在世界大道上\n')
+while True:
+    foe=Foe().foe()
+    #print(foe) 检测函数
+    foe_name = foe_hp_and_attack()
+    foe_name.foe_hp()
+    move1=input('你看到前方有一个挑战者'+str(foe)+'出现\n'
+                '你想怎么做：\n'
+                '1:激战\n'
+                '2:恢复\n'
+                '3:逃跑\n'
+                '\n')
+    if move1=='1':
+        move2=input('请选择你的招数：\n'
+              '1：小招\n'
+              '2：大招\n''\n')
+        if move2=='1' and foe_name.hp_foe>=0:
+            p.fight()
+            kill=random.randrange(5, 10)
+            if lucky>1000:
+                kill=10
+            foe_name.hp_foe=foe_name.hp_foe-kill
+            if kill>8:
+                print('人品爆棚，产生了暴击')
+            print(foe+'现在的血量为：'+str(foe_name.hp_foe))
+        if move2=='2'and foe_name.hp_foe>=0:
+            p.fight()
+            kill=random.randrange(10, 20)
+            foe_name.hp_foe = foe_name.hp_foe - kill
+            if lucky>1000:
+                kill=20
+            foe_name.hp_foe=foe_name.hp_foe-kill
+            if kill>18:
+                print('人品爆棚，产生了暴击')
+            print(foe+'现在的血量为：'+str(foe_name.hp_foe))
+    if move1=='2':
+        move3=input('请选择你要恢复的属性：\n'
+              '1：生命值\n'
+              '2：护甲值\n''\n')
+        if move3=='1':
+            move4=input('选择你要吃的物品：\n'
+                  '1:生命之水     2：生命之果\n')
+            if move4=='1':
+                pp.have_water()
+            if move4=='2':
+                pp.have_food()
+        if move3=='2':
+            fightlost-=1
+            if fightlost<0:
+                fightlost=10
+                print('由于你一直提升护甲，导致护甲崩溃，现在护甲为0\n')
+            fightlost_hard-=1
+            if fightlost_hard<0:
+                fightlost_hard = 15
+                lucky+=5
+                print('由于你一直提升护甲，导致护甲崩溃，现在护甲为0')
+                print('同时人品值上升 5\n')
+    if move1=='3':
+        print('你逃跑了，人品值-100\n')
+        lucky-=100
