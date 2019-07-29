@@ -1,0 +1,24 @@
+with open('case2_1.txt') as c :
+    cc=c.read()
+f=re.split(r'[\s+\,\;\.]+', cc)
+print(f) #检验文件读取是是否成功
+#方法1
+def list_count(f):
+    global munter
+    munter={}
+    for i in f :
+        munter[i]=f.count(i)
+    print(munter)
+list_count(f)
+#方法2
+def all_np(arr):
+    arr = np.array(arr)
+    key = np.unique(arr)
+    result = {}
+    for k in key:
+        mask = (arr == k)
+        arr_new = arr[mask]
+        v = arr_new.size
+        result[k] = v
+    print( result)
+all_np(f)
