@@ -1,0 +1,10 @@
+import urllib.request
+import re
+data=urllib.request.urlopen('https://read.douban.com/provider/all').read()
+data=data.decode('utf-8')
+pat='<div class="name">(.*?)</div>'
+result=re.compile(pat).findall(str(data))
+print(result)
+with open('chubanshe.txt','w') as f:
+    for i in range(0,len(result)):
+        f.write(result[i]+'\n')
