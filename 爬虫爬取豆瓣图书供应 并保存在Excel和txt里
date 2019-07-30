@@ -1,0 +1,16 @@
+import urllib.request
+import re
+import openpyxl
+data=urllib.request.urlopen('https://read.douban.com/provider/all').read()
+data=data.decode('utf-8')
+pat='<div class="name">(.*?)</div>'
+result=re.compile(pat).findall(str(data))
+print(result)
+wb=openpyxl.Workbook('出版车.xlsx')
+ws=wb.active
+ws=wb.create_sheet('数据')
+for i in range(1,131):
+    a = result[i]
+    b = re.compile('/,').split(a)
+    ws.append(b)
+wb.save('chu.xlsx')
