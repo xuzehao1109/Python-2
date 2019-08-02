@@ -1,0 +1,75 @@
+# @Time : 2019/7/31 17:19 
+
+# @Author : xuzehao
+
+# @File : test1.py 
+
+# Please contact if necessary:835981898@qq.com
+# coding: utf-8
+import re
+import openpyxl
+import os
+
+wb=openpyxl.Workbook('匹配后数据.xlsx')
+ws=wb.active
+ws=wb.create_sheet('数据')
+boxhead=['例编号','用例结果','checkmemory','log文件','错误信息']
+ws.append(boxhead)
+def file_name(file_dir):
+    for root, dirs, files in os.walk(file_dir):
+        root=root+'\\'
+        for i in files:
+            file_single=root+i
+            try:
+                with open(file_single,'r',encoding='utf8') as fl :
+                    fl=fl.read()
+                    fl=re.split('\s\\n',fl)
+                fl=str(fl)
+                #用例编号 Use case number
+                use_case_number=re.findall('脚本编号:.*?(.*)模块名称',fl)
+                use_case_number=re.sub(r'\\n','',str(use_case_number))
+                use_case_number=re.sub(r'\\','',str(use_case_number))
+                use_case_number=re.sub(' ','',str(use_case_number))
+                use_case_number=use_case_number[2:-2]
+                use_case_number = re.compile('/,').split(use_case_number)
+                #用例结果
+                test_result=re.findall('测试结果:(.*?)结束时间',fl)
+                test_result=re.sub(r'\\n','',str(test_result))
+                test_result=re.sub(r'\\','',str(test_result))
+                test_result=re.sub(' ','',str(test_result))
+                test_result=test_result[2:-2]
+                test_result = re.compile('/,').split(test_result)
+                #checkmemory信息
+                result_FAIL=re.findall('Step:CheckMemory.*?(FAIL|PASS)',fl)
+
+                #rm -rf /data/valgrind_log/ log文件
+                log=re.findall('rm -rf /data/valgrind_log/(.*?)~ #',fl)
+                if log ==True:
+                    log=re.sub(r'\\n','',str(log))
+                    log=re.sub(r'\\','',str(log))
+                    log=log[2:-6]
+                    log = re.compile('/,').split(log)
+                elif log==None:
+                    log=['NA']
+                #错误信息
+                if result_FAIL==['FAIL']:
+                    result_res=re.findall('日志中存在以下信息:(.*?)结果判断',fl)
+                    result_res=re.sub(r'\\n','',str(result_res))
+                    result_res=re.sub(r'\\','',str(result_res))
+                    result_res=result_res[6:-2]
+                    result_res = re.compile('/,').split(result_res)
+                elif result_FAIL==None or result_FAIL==['PASS'] :
+                    result_res=['NA']
+                report=use_case_number+test_result+result_FAIL+log+result_res
+                print('正在写入Excel文件.....')
+                ws.append(report)
+            except UnicodeDecodeError:
+                i=re.match('[A-Z].*?\(',i).group()
+                i=re.sub('\(','',i)
+                report = re.compile('/,').split(str(i))
+                print(str(report)+'编码错误')
+                ws.append(report)
+#file_name(input('请输入文件路径：'))
+file_name('C:\\Users\\xuzehao\\PycharmProjects\\untitled3\\test1_1')
+#file_name('C:\\Users\\xuzehao\\PycharmProjects\\untitled3\\1')
+wb.save('test.xlsx')
