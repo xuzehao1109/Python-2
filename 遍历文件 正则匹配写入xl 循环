@@ -1,0 +1,131 @@
+import re
+import openpyxl
+import os
+
+wb=openpyxl.Workbook('匹配后数据.xlsx')
+ws=wb.active
+ws=wb.create_sheet('数据')
+boxhead=['例编号','用例结果','checkmemory','log文件','错误信息']
+ws.append(boxhead)
+def file_name(file_dir):
+    for root, dirs, files in os.walk(file_dir):
+        root=root+'\\'
+        for i in files:
+            file_single=root+i
+            print(file_single)
+            try:
+                try:
+                    with open(file_single,'r',encoding='utf8') as fl :
+                        fl = fl.read()
+                        fl = re.split('\s\\n', fl)
+
+                except:
+                    with open(file_single, 'rb') as fl:
+                        fl=fl.read().decode("utf-8","ignore")
+                        fl=re.split('\s\\n',fl)
+
+                fl=str(fl)
+
+                i = re.match('[A-Z].*?\(', i).group()
+                i = re.sub('\(', '', i)
+                use_case_number = re.compile('/,').split(str(i))
+                # 用例结果
+                # print(fl)
+                test_result = re.findall('测试结果:(FAIL|ERROR)', fl)
+                test_result = re.sub(r'\\n', '', str(test_result))
+                test_result = re.sub(r'\\', '', str(test_result))
+                test_result = re.sub(' ', '', str(test_result))
+
+                test_result = test_result[2:-2]
+                test_result = re.compile('/,').split(test_result)
+                # checkmemory信息
+                result_FAIL = re.findall('Step:CheckMemory.*?(FAIL|PASS)', fl)
+                # rm -rf /data/valgrind_log/ log文件
+                if result_FAIL!=[]:
+                    log = re.findall(r'rm -rf /data/valgrind_log/(.*?)~ #', fl)
+                    log = re.sub(r'\\n', '', str(log))
+                    log = re.sub(r'\\', '', str(log))
+                    log = log[2:-6]
+                    log = re.compile('/,').split(log)
+                    if log == []:
+                        log = ['NA']
+                    # 错误信息
+                    if result_FAIL == ['FAIL']:
+                        result_res = re.findall('日志中存在以下信息(.*?)结果判断', fl)
+
+                        result_res = re.sub(r'\\n', '', str(result_res))
+                        result_res = re.sub(r'\\', '', str(result_res))
+                        result_res = result_res[6:-2]
+                        result_res = re.compile('/,').split(result_res)
+
+                    elif result_FAIL == None or result_FAIL == ['PASS']:
+                        result_res = ['NA']
+
+
+                    if test_result==['']:
+
+                        with open(file_single, 'rb') as fl_se:
+                            fl_se = fl_se.read().decode("gbk", "ignore")
+                            fl_se = re.split('\s\\n', fl_se)
+                        fl_se=str(fl_se)
+                        test_result = re.findall('测试结果:(FAIL|ERROR)', fl_se)
+                        test_result = re.sub(r'\\n', '', str(test_result))
+                        test_result = re.sub(r'\\', '', str(test_result))
+                        test_result = re.sub(' ', '', str(test_result))
+
+                        test_result = test_result[2:-2]
+                        test_result = re.compile('/,').split(test_result)
+                        #print(test_result)
+                        # checkmemory信息
+                        result_FAIL = re.findall('Step:CheckMemory.*?(FAIL|PASS)', fl_se)
+                        #print(result_FAIL)
+                        # rm -rf /data/valgrind_log/ log文件
+                        log = re.findall('rm -rf /data/valgrind_log/(.*?)~ #', fl_se)
+                        log = re.sub(r'\\n', '', str(log))
+                        log = re.sub(r'\\', '', str(log))
+                        log = log[2:-6]
+                        log = re.compile('/,').split(log)
+                        if log==[]:
+                            log=['NA']
+
+                        # 错误信息
+                        if result_FAIL == ['FAIL']:
+                            result_res = re.findall('日志中存在以下信息(.*?)结果判断', fl_se)
+                            #print(fl_se)
+                            #print(result_res)
+                            result_res = re.sub(r'\\n', '', str(result_res))
+                            result_res = re.sub(r'\\', '', str(result_res))
+                            result_res = result_res[6:-2]
+                            result_res = re.compile('/,').split(result_res)
+                        elif result_FAIL == None or result_FAIL == ['PASS']:
+                            result_res = ['NA']
+                    if result_FAIL==[]:
+                        result_FAIL=['CheckMemory不存在']
+                    #错误信息换行
+                    print("111111111111")
+                    print(result_res)
+                    result_res = str(result_res).replace("\"", "\'")
+                    result_res=eval(str(result_res))
+                    show_info = "\n".join(result_res)
+                    result_res=show_info
+                    report=use_case_number+test_result+result_FAIL+log
+                    report.append(result_res)
+                    print(report)
+                    print('正在写入Excel文件.....')
+                    ws.append(report)
+                else:
+                    result_FAIL=['没有开启CheckMemory']
+                    log=['NA']
+                    result_res=['NA']
+                    rp=use_case_number+test_result+result_FAIL+log+result_res
+                    ws.append(rp)
+            except UnicodeDecodeError:
+                i=re.match('[A-Z].*?\(',i).group()
+                i=re.sub('\(','',i)
+                report = re.compile('/,').split(str(i))
+                print(str(report)+'编码错误')
+                ws.append(report)
+#file_name(input('请输入文件路径：'))
+file_name('C:\\Users\\xuzehao\\PycharmProjects\\untitled3\\test1_1')
+#file_name('C:\\Users\\xuzehao\\PycharmProjects\\untitled3\\1')
+wb.save('test.xlsx')
