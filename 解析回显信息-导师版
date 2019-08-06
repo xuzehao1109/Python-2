@@ -1,0 +1,240 @@
+import os
+import re
+import xml.etree.ElementTree as ET
+class Test_case_1 :
+    def __init__(self):
+        pass
+    def del_space_lines(self, dut_info_rec):
+        for i in range(len(dut_info_rec)):
+            if not dut_info_rec[i]:
+                dut_info_rec.remove(dut_info_rec[i])
+                break
+            elif len(dut_info_rec)-1 == i:
+                return dut_info_rec
+        return self.del_space_lines(dut_info_rec)
+    def dut_get_show_ip_route_vrf_word_count(self,show_info):
+        dict_value = {}
+
+        # 按行读取信息，并清除空值清除无用信息头信息尾数据
+        show_info_split = show_info.split("\n")
+        if re.match(r'.*show.*', show_info_split[0]):
+            show_info_split.remove(show_info_split[0])
+        if re.match(r'.*#.*', show_info_split[0]):
+            show_info_split.remove(show_info_split[0])
+        if re.match(r'.*#.*', show_info_split[-1]):
+            show_info_split.remove(show_info_split[-1])
+        dut_info_split = show_info_split
+        # （去掉dut_info_split中的空值以及只包含空格符的值）
+        for i in dut_info_split:
+            if '' in dut_info_split:
+                dut_info_split.remove('')
+        for i in dut_info_split:
+            if ' ' in dut_info_split:
+                dut_info_split.remove(' ')
+        for i in range(len(dut_info_split)):
+            dut_info_split[i] = dut_info_split[i]
+        #print(dut_info_split)
+        round_info_list=[]
+        round_info_index=0
+        for i in range(len(dut_info_split)):
+            if re.match('.*Routing Table:.*',dut_info_split[i]):
+                mainobj=re.match('.*(Routing Table):(.*)',dut_info_split[i])
+                dict_value[mainobj.group(1)]=mainobj.group(2).strip()
+            elif re.match('.*route info.*',dut_info_split[i]):
+                round_info_index=i
+        round_info_list=dut_info_split[i:]
+        #print(round_info_list)
+        for i in range(len(round_info_list)):
+            if "(" in round_info_list[i]:
+                if re.match('(.*):(.*)\((.*):(.*)\)',round_info_list[i].strip()):
+                    mainobj=re.match('(.*):(.*)\((.*):(.*)\)',round_info_list[i].strip())
+                    dict_value[mainobj.group(1).strip()]=mainobj.group(2).strip()
+                    dict_value[mainobj.group(3).strip()]=mainobj.group(4).strip()
+            else:
+                if re.match('.*:.*',round_info_list[i]):
+                    mainobj=re.match('(.*):(.*)',round_info_list[i])
+                    dict_value[mainobj.group(1).strip()]=mainobj.group(2).strip()
+
+        return dict_value
+    def dut_get_show_ipv6_neighbors_verbose(self,show_info):        #函数名由锐捷提供
+        value_title="IPv6 Address"
+        dict_value={}
+        show_info_split = show_info.split("\n")
+        if re.match(r'.*#.*',show_info_split[0]):
+            show_info_split.remove(show_info_split[0])
+        if re.match(r'.*show.*',show_info_split[0]):
+            show_info_split.remove(show_info_split[0])
+        if re.match(r'.*#.*',show_info_split[-1]):
+            show_info_split.remove(show_info_split[-1])
+        dut_info_split1=show_info_split
+        dut_info_split2 = self.del_space_lines(dut_info_split1)
+        dut_info_split = []
+        value_pro=""
+        value_num=0
+        for value in dut_info_split2:
+            if value_num != 0 :
+                value_pro = dut_info_split[-1]
+            if re.match(r"State:.*",value.strip()):
+                value_state = value
+                value_last = value_pro+value_state
+                dut_info_split.pop()
+                dut_info_split.append(value_last)
+            else:
+                dut_info_split.append(value)
+            value_num = value_num +1
+        length_list = [40,15,20,100]
+        length_list_len = len(length_list)
+        length = len(dut_info_split)
+        ip_address_list = []
+        for i in range(length):
+            sight = 0
+            sight_sum=0
+            list_len = []
+            #每行中取值
+            for j in range(length_list_len):
+                sight_sum = sight_sum+int(length_list[j])
+                row_value = dut_info_split[i][sight:sight_sum]
+                sight = sight_sum
+                row_value = row_value.lstrip()
+                row_value = row_value.rstrip()
+                list_len.append(row_value)
+            if list_len[0]==value_title:
+                title = list_len
+            elif list_len[0]!=value_title:
+                ip_address_list.append(list_len[0])
+                for s in range(1,length_list_len):
+                    if s == 3 :
+                        if re.match("State:(.*)Age:(.*)asked:(.*)",list_len[3].strip()):
+                            obj_1 = re.match("State:(.*)Age:(.*)asked:(.*)",list_len[3])
+                            list_1 =["State","Age","asked"]
+                            count = 1
+                            for value_list_1 in list_1:
+                                key_name = '%s/%s' % (str(list_len[0]).lstrip("*"),value_list_1)
+                                dict_value[key_name]=obj_1.group(count).strip()
+                                count =count +1
+                    else:
+                        key_name = '%s/%s' % (str(list_len[0]).lstrip("*"),title[s])
+                        dict_value[key_name]=list_len[s]
+            dict_value["ipv6_address_list"]=ip_address_list
+        return dict_value
+    def dut_get_show_ipv6_dhcp_relay_statistics(self,show_info):
+        dict_value={}
+        #########################################################################################
+        #用于去除show_info中前后的hostname，或show命令每行前面的空格，只保留具体回显以免发生误判#
+        #########################################################################################
+        show_info_split = show_info.split("\n")
+        if re.match(r'.*#.*',show_info_split[0]):
+            show_info_split.remove(show_info_split[0])
+        if re.match(r'.*show.*',show_info_split[0]):
+            show_info_split.remove(show_info_split[0])
+        if re.match(r'.*#.*',show_info_split[-1]):
+            show_info_split.remove(show_info_split[-1])
+        dut_info_split=self.del_space_lines(show_info_split)
+        #print dut_info_split
+        length = len(dut_info_split)
+        ######################################################
+        #使用正则匹配列表前的内容，并提取出写入字典，删除该行#
+        ######################################################
+        #print dut_info_split
+        first_name = ""
+        sec_name = ""
+        name = ""
+        for i in range(length):
+            if re.match(r'\w+(.*):\s+(.*)',dut_info_split[i]):
+                matchObj = re.match(r'(.*):\s+(.*)',dut_info_split[i])
+                first_name = matchObj.group(1).strip()
+                dict_value[matchObj.group(1).strip()]=matchObj.group(2).strip()
+            elif re.match(r'\s+(.*):(.*)',dut_info_split[i]):
+                matchObj = re.match(r'(.*):(.*)',dut_info_split[i])
+                name =  '%s/%s' % (first_name,matchObj.group(1).strip())
+                dict_value[name]=matchObj.group(2).strip()
+
+        return dict_value
+
+
+
+
+if __name__ == '__main__':
+    show_info_1="""S7810_2010#show ip route vrf test2  count
+Routing Table: test2
+
+--------- route info ----------
+the num of active route: 103(include ecmp: 103)
+
+S7810_2010#"""
+    show_info_2="""Ruijie#show ipv6 neighbors verbose
+
+ IPv6 Address                            Linklayer Addr Interface
+ 1000::1                                 0012.3456.732b GigabitEthernet 5/1
+        State: REACH/H Age: - asked: 0
+*1000::2                                 0010.9400.0002 GigabitEthernet 5/1
+        State: STALE/H Age: 3357 s asked: 0
+ FE80::1                                 0010.9400.0002 GigabitEthernet 5/1
+        State: STALE/H Age: 3362 s asked: 0
+ FE80::212:34FF:FE56:732B                0012.3456.732b GigabitEthernet 5/1
+        State: REACH/H Age: - asked: 0
+Ruijie#"""
+    show_info_3="""Ruijie#show ipv6 neighbors verbose
+ IPv6 Address                            Linklayer Addr Interface             State          Age         Asked
+ 2001:DA8:218:4018::1                    0074.9c86.475d VLAN 41               State: REACH/H Age: -      asked: 0
+ 2001:DA8:218:4020::1                    0074.9c86.475d VLAN 49               State: REACH/H Age: -      asked: 0
+ FE80::274:9CFF:FE86:475D                0074.9c86.475d VLAN 41               State: REACH/H Age: -      asked: 0
+ FE80::274:9CFF:FE86:475D                0074.9c86.475d VLAN 49               State: REACH/H Age: -      asked: 0
+Ruijie#"""
+    show_info_4="""Ruijie#show ipv6 dhcp relay statistics
+Packets dropped:         0
+    Error:               0
+Packets received:        4
+    SOLICIT:             1
+    REQUEST:             1
+    CONFIRM:             0
+    RENEW:               0
+    REBIND:              0
+    RELEASE:             0
+    DECLINE:             0
+    INFORMATION-REQUEST: 0
+    RELAY-FORWARD:       0
+    RELAY-REPLY:         2
+Packets sent:            4
+    ADVERTISE:           1
+    RECONFIGURE:         0
+    REPLY:               1
+    RELAY-FORWARD:       2
+    RELAY-REPLY:         0
+
+Configuration statistics:
+ DHCPv6 relay destination:            1
+Ruijie#"""
+    show_info_5="""Ruijie#show ipv6 dhcp relay statistics
+Packets dropped:         0
+    Error:               0
+Packets received:        4
+    SOLICIT:             1
+    REQUEST:             1
+    CONFIRM:             0
+    RENEW:               0
+    REBIND:              0
+    RELEASE:             0
+    DECLINE:             0
+    INFORMATION-REQUEST: 0
+    RELAY-FORWARD:       0
+    RELAY-REPLY:         2
+Packets sent:            4
+    ADVERTISE:           1
+    RECONFIGURE:         0
+    REPLY:               1
+    RELAY-FORWARD:       2
+    RELAY-REPLY:         0
+
+Configuration statistics:
+ DHCPv6 relay destination:            1
+Ruijie#"""
+
+    obj = Test_case_1()
+    obj_return_1 = obj.dut_get_show_ipv6_dhcp_relay_statistics(show_info_5)
+    print (obj_return_1)
+
+    obj_return = str(obj_return_1).replace("\', \'", "\'\n\'")
+    print ("==================>")
+    print (obj_return)
+    print ("<==================")
