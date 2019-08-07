@@ -1,0 +1,86 @@
+import re
+show_info='''ruijie#show mpls ldp neighbor
+
+Default VRF:
+    Peer LDP Ident: 2.2.2.2:0; Local LDP Ident: 1.1.1.1:0
+	TCP connection: 2.2.2.2.51930 - 1.1.1.1.646
+	State: OPERATIONAL; Msgs sent/recv: 33/34; UNSOLICITED
+	Up time: 00:01:11
+	Graceful Restart enabled; Peer reconnect time (msecs): 300000
+	LDP discovery sources:
+	  Link Peer on TenGigabitEthernet 1/2, Src IP addr: 11.1.1.1
+	Addresses bound to peer LDP Ident:
+	  2.2.2.2         11.1.1.1        10.1.1.1        
+    Peer LDP Ident: 3.3.3.3:0; Local LDP Ident: 1.1.1.1:0
+	TCP connection: 3.3.3.3.42754 - 1.1.1.1.646
+	State: OPERATIONAL; Msgs sent/recv: 33/34; UNSOLICITED
+	Up time: 00:01:08
+	Graceful Restart enabled; Peer reconnect time (msecs): 300000
+	LDP discovery sources:
+	  Link Peer on TenGigabitEthernet 1/22, Src IP addr: 21.1.1.1
+	Addresses bound to peer LDP Ident:
+	  3.3.3.3         21.1.1.1        20.1.1.1   
+ruijie#'''
+def show_mpls_ldp_neighbor(self):
+	#正则匹配解析信息
+	Peer_LDP_Ident=re.findall('Peer LDP Ident: (.*?)\;',self)
+	Local_LDP_Ident=re.findall('Local LDP Ident: (.*?\:0)',self)
+	TCP_connection=re.findall('TCP connection: (.*?)\n',self)
+	Msgs_sent_recv=re.findall('Msgs sent/recv: (.*?)\;',self)
+	Up_time=re.findall('Up time: (.*?)\n',self)
+	State=re.findall('State: (.*?)\;',self)
+	Graceful_Restart=re.findall('Graceful Restart (.*?)\;',self)
+	Link_Peer=re.findall('Link Peer on (.*?)\,',self)
+	Src_IP_addr=re.findall('Src IP addr: (.*?)\n',self)
+	Addr_LDPIdent=re.findall('Addresses bound to peer LDP Ident:\n\t\s\s(.*)\s{3}\n',self)
+	#设置参数
+	se=len(Peer_LDP_Ident)
+	updata_peer={}
+	updata_tcp={}
+	updata_state={}
+	updata_msg={}
+	updata_time={}
+	updata_restat={}
+	updata_link={}
+	updata_src={}
+	updata_bb={}
+	for i in range(0,se):
+		#key名
+		Peer_LDP_Ident_Local = Peer_LDP_Ident[i] + '/'+'Local LDP Ident'
+		tcp=Peer_LDP_Ident[i]+'/'+'TCP connection'
+		state=Peer_LDP_Ident[i]+'/'+'State'
+		msg=Peer_LDP_Ident[i]+'/'+'Msgs sent/recv'
+		time=Peer_LDP_Ident[i]+'/'+'Up time'
+		restar=Peer_LDP_Ident[i]+'/'+'Graceful Restart'
+		link=Peer_LDP_Ident[i]+'/'+'Link Peer'
+		src=Peer_LDP_Ident[i]+'/'+'Src IP addr'
+		########################
+		bb = re.split('\s{8}', Addr_LDPIdent[i])
+		bb = re.sub(' ', '', str(bb))
+		bb = bb[1:-1]
+		bb = re.sub('\'', '', bb)
+		bb = re.split('\,', str(bb))
+		addr=Peer_LDP_Ident[i]+'/'+'Addresses bound to peer LDP Ident'
+		#value值
+		updata_peer[Peer_LDP_Ident_Local]=Local_LDP_Ident[i]
+		updata_tcp[tcp]=TCP_connection[i]
+		updata_state[state]=State[i]
+		updata_msg[msg]=Msgs_sent_recv[i]
+		updata_time[time]=Up_time[i]
+		updata_restat[restar]=Graceful_Restart[i]
+		updata_link[link]=Link_Peer[i]
+		updata_src[src]=Src_IP_addr[i]
+		updata_bb[addr]=bb
+		show_mpls_ldp_neighbor = {'Peer LDP Ident': ''}
+		show_mpls_ldp_neighbor.update(updata_peer)
+		show_mpls_ldp_neighbor.update(updata_tcp)
+		show_mpls_ldp_neighbor.update(updata_state)
+		show_mpls_ldp_neighbor.update(updata_msg)
+		show_mpls_ldp_neighbor.update(updata_time)
+		show_mpls_ldp_neighbor.update(updata_restat)
+		show_mpls_ldp_neighbor.update(updata_link)
+		show_mpls_ldp_neighbor.update(updata_src)
+		show_mpls_ldp_neighbor.update(updata_bb)
+	show_mpls_ldp_neighbor['Peer LDP Ident']=Peer_LDP_Ident
+	print(show_mpls_ldp_neighbor)
+show_mpls_ldp_neighbor(show_info)
