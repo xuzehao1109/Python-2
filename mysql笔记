@@ -1,0 +1,100 @@
+#进阶1 基础查询 
+/*
+#select * from 表名
+#select 查询列表
+查询列表可以是 ：表中字段 常量 表达式 函数 
+ 查询结果是 一个虚拟的
+ 
+ */
+ USE employees;
+ #查询单个
+ SELECT last_name FROM employees;
+ 
+ #查询多个
+  SELECT last_name,salary,email FROM employees;
+  
+#查询所有字段
+ SELECT * FROM employees;
+
+SELECT VERSION()
+
+#起别名 可以区分别名 
+SELECT 199%98 AS 结果；
+SELECT last_name AS 姓 FROM employees;
+SELECT last_name 姓 ,`phone_number` 电话  FROM employees;
+SELECT salary AS 'out put' FROM employees;
+
+#去重
+#案例查询部门编号
+SELECT department_id FROM employees;
+SELECT DISTINCT department_id FROM employees;
+
+#+ 加号的案例
+/*
+加号只有运算功能
+select 100+99
+select '123'+90:其中一方为字符型 试图转换为数值型
+		转换成功 做加法运算
+		转换失败 字符型转换为0 继续做加法运算
+		一个为null 结果为null
+
+*/
+# 案例 ：员工名和姓连接成一个字段
+SELECT 
+  CONCAT(last_name, `first_name`) AS 姓名 
+FROM
+  employees ;
+  
+  #显示出表employees的全部列，各个列之间用逗号连接，列头显示成OUT_PUT
+  
+  #用 ifnull 函数
+
+SELECT 
+	IFNULL(commission_pct,0) AS 奖金率,
+	commission_pct
+FROM 
+	employees;
+	
+	
+#-------------------------------------------
+
+SELECT
+	CONCAT(`first_name`,',',`last_name`,',',`job_id`,',',IFNULL(commission_pct,0)) AS out_put
+FROM
+	employees;
+
+
+#进阶2 条件查询 
+/*\
+select                          顺序
+		查询列表          3
+from 
+		表名              1
+where
+		筛选条件          2
+		
+
+分类： 按条件表达式筛选  ：>  <  !=  <>  <=   >=
+
+       按逻辑表达式筛选 ：and or  not 
+       模糊查询：  like 
+		   between and 
+		   in 
+		   is null 
+		   
+*/
+#案例查询工资大于12000
+SELECT 
+  first_name ,last_name ,email ,phone_number ,job_id ,salary ,IFNULL(commission_pct, 0) ,IFNULL(manager_id,0),department_id,hiredate
+FROM
+  employees 
+WHERE salary > 12000 ;
+
+#案例 查询部门不等于90号且工资小于12000的员工名的部门编号
+SELECT 
+  last_name,
+  department_id,
+  salary 
+FROM
+  employees 
+WHERE department_id != 90 AND salary <=12000 ;
