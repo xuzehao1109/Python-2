@@ -104,3 +104,108 @@ WHERE department_id != 90 AND salary <=12000 ;
 ################################################## ####################
 ＃¥##############现转为用笔记本记录笔记########################### ######
 #################此项目暂不更新############################ ############
+#按逻辑表达式筛选
+#用于连接条件表达式
+SELECT 
+  `first_name` 
+FROM
+  `employees` 
+WHERE `department_id` < 90 
+  OR `department_id` > 100 ;
+
+#模糊查询
+#1 like  特点 一般和通配符搭配 
+#通配符 % 代表任意字符包含0个字符 
+#       _任意单个字符
+#案例1 查询员工名字中包含a
+SELECT 
+  * 
+FROM
+  employees 
+WHERE last_name LIKE '%a%' ;
+
+#案例2 查询员工名中第三个字符为n 第五个字符为l的员工和工资
+SELECT 
+  last_name,
+  salary 
+FROM
+  employees 
+WHERE last_name LIKE '__n_l%' ;
+
+#案例3 查询员工名第二个字符为_的员工
+SELECT 
+  last_name 
+FROM
+  employees 
+WHERE last_name LIKE '_\_%' 
+#或者 where last_name like '_&_%' escape '&'
+  #2 between and 
+  #使用between and 可以试代码简洁 包含临界值  大小顺序不可以颠倒 
+  #案例1 查询员工编号在100-120之间
+  SELECT 
+    * 
+  FROM
+    employees 
+  WHERE employee_id >= 100 
+    AND employee_id <= 120 ;
+#-----------------------------------------
+SELECT 
+  * 
+FROM
+  employees 
+WHERE employee_id BETWEEN 100 
+  AND 120 ;
+
+# 3 in 
+# 案例 查询员工工种编号是 it_prog AD_PRES AD_VP
+#判断某字符是否属于in中的某一项
+#in 列表的类型必须一致或者兼容
+#'123'--123
+#不可在in中用通配符
+SELECT 
+  last_name,
+  job_id 
+FROM
+  employees 
+WHERE job_id IN ('AD_PRES', ' AD_VP') 
+#4 is null 
+#不能用=判断null
+#案例1 查询没有奖金的员工名和奖金率
+
+  SELECT 
+    last_name,
+    commission_pct 
+  FROM
+    employees 
+  WHERE commission_pct IS NULL ;
+    SELECT 
+      last_name,
+      commission_pct 
+    FROM
+      employees 
+    WHERE commission_pct IS NOT NULL ;
+    
+    
+#安全等于 <=>
+#可以判断null
+SELECT 
+  last_name,
+  commission_pct 
+FROM
+  employees 
+WHERE commission_pct <=> NULL 
+#案例2 查询工资为12000
+  SELECT 
+    last_name,
+    commission_pct,
+    salary 
+  FROM
+    employees 
+  WHERE salary <=> 12000 ;
+#案例3 查询工号为176的员工姓名部门和年薪
+SELECT 
+  last_name ,
+  department_id ,
+  salary * 12 *(1+ IFNULL(commission_pct,0 )) AS 年薪 
+FROM
+  employees ;
