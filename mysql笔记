@@ -437,3 +437,65 @@ SELECT SUM(commission_pct),AVG(commission_pct)FROM employees
 
 #和distinct
 SELECT SUM(DISTINCT salary),SUM(salary) FROM employees
+
+# count 函数
+#使用的最多
+SELECT COUNT(salary) FROM employees
+SELECT COUNT(*)FROM employees  #统计行数
+SELECT COUNT(1) FROM employees #统计行数
+SELECT COUNT('x')FROM employees
+#效率问题 innodb count(1)和count(*)效率差不多
+#         mysam count(*)效率最高
+#一般使用count(*)统计行数
+
+
+#和分组函数一起查询的字段有限制有要求
+#一般要求是 group by后面的字段
+
+SELECT MAX(salary),MIN(salary),AVG(salary),SUM(salary)FROM employees
+SELECT MAX(hiredate)-MIN(hiredate) AS 天数 FROM employees#错误的
+SELECT DATEDIFF(MAX(hiredate),MIN(hiredate)) FROM employees
+SELECT COUNT(*) FROM employees WHERE department_id=90
+
+
+
+#进阶五 分组查询
+#查询每个部门的平均工资  group by 
+/*
+select 分组函数 ，列（要求在group by 后面）
+ from
+ where
+ group by
+ order by
+ 查询列表比较特殊
+
+*/
+#查询工种最高工资
+SELECT MAX(salary),job_id
+FROM employees
+GROUP BY job_id
+
+#案例2 查询每个位置上的部门个数
+SELECT COUNT(*) ,location_id FROM departments GROUP BY location_id
+
+#添加筛选条件
+#案例1 查询邮箱里有a 每个部门的平均工资
+SELECT AVG(salary),department_id
+FROM employees 
+WHERE email LIKE '%a%'
+GROUP BY department_id
+
+
+#案例2 查询有奖金的每个领导手下的最高工资
+SELECT MAX(salary),manager_id
+FROM employees
+WHERE commission_pct IS NOT NULL
+GROUP BY manager_id
+
+#
+
+
+
+
+
+
