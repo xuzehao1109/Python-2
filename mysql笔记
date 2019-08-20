@@ -209,3 +209,231 @@ SELECT
   salary * 12 *(1+ IFNULL(commission_pct,0 )) AS 年薪 
 FROM
   employees ;
+SELECT *FROM employees WHERE job_id LIKE '%T%' ORDER BY department_id DESC ;
+#进阶4 常用函数
+/*
+将一组逻辑语句封装
+调用 select 函数名（实参列表） from 表；
+
+
+单行函数 ：concat  length ifnull
+分组函数 做统计使用 
+
+
+单行函数：字符函数 数学函数 日期函数 其他函数 流程控制函数
+
+
+
+*/
+
+#字符函数
+#length 获取字节长度
+SELECT `first_name`,LENGTH(`first_name`) AS 名字长度 FROM employees
+#concat 拼接字符串
+SELECT CONCAT (last_name,first_name) FROM employees;
+# upper lower 
+#案例 将姓变大写 名变小写
+SELECT CONCAT (UPPER(first_name),LOWER(last_name)) FROM employees;
+
+#substr 截取字符串
+#从索引开始的长度
+ SELECT SUBSTR( '李莫愁爱上了陆展元',7) 
+#制定字节长度
+SELECT SUBSTR('李莫愁爱上了陆展元',1,3)
+#案例 姓名中首字符大写 其他小写 再显示
+SELECT CONCAT (UPPER(SUBSTR(last_name,1,1)),'_',LOWER(SUBSTR(last_name,2))) FROM employees
+
+# instr
+#返回子串第一次出现的索引
+SELECT INSTR('老鼠爱上大米','大米')
+
+SELECT INSTR('老鼠大米爱上大米','大')
+
+#trim
+SELECT TRIM ('    abcd   y ') AS p
+
+# lpad 左填充   rpad 右填充
+SELECT LPAD ('大米',10,'*')  AS  ooo 
+
+
+#replace 替换
+SELECT REPLACE('大米小米大米','大米','aa')
+
+
+#数学函数
+#round 四舍五入
+SELECT ROUND(-1.555)
+SELECT ROUND (1.568,2)
+
+
+#ceil 向上取整
+  SELECT CEIL (1.56)
+  SELECT CEIL(-1.001)
+  
+#floor 向下取整
+ SELECT FLOOR(-9.9)
+ 
+ #truncate  截断  只要
+ SELECT TRUNCATE(1.68,1)
+ 
+ #mod 取余 等同于%
+ 
+ SELECT MOD (10,3)
+
+
+#日期函数
+
+#用于对日期处理 或者返回日期
+
+#now 返回当前日期时间
+
+SELECT NOW()
+
+#curdate  返回日期 没有时间
+
+SELECT CURDATE()
+
+#curtime  返回时间 没有时间
+
+SELECT CURTIME()
+
+#获取 年月日小时分针秒
+SELECT YEAR(NOW())
+SELECT YEAR('1998-1-1')
+SELECT YEAR(hiredate) FROM employees
+
+
+SELECT MONTH(NOW())
+SELECT MONTHNAME(NOW())
+ 
+ #str_to_date 通过指定 的格式
+ 
+ SELECT STR_TO_DATE('1998-8-2','%Y-%c-%d')
+ 
+ 
+ #案例  查询入职日期为1992-4-3
+ #默认  
+SELECT * FROM employees WHERE hiredate ='1992-4-3'
+
+SELECT *FROM employees WHERE hiredate=STR_TO_DATE('1992-4-3','%Y-%c-%d')
+
+
+#date_format 将日期转换成字符
+
+SELECT DATE_FORMAT(NOW(),'%Y年%m月%d日')
+
+#查询有奖金的员工名和入职日期 （xx月-xx日-xx年）
+SELECT last_name,DATE_FORMAT(hiredate,'%m月/%d日/%y年')
+FROM employees
+WHERE commission_pct IS NOT NULL
+
+
+#其他函数  
+SELECT  VERSION()
+SELECT DATABASE()
+SELECT USER()
+
+#流程控制函数
+
+#if  ： if else 的效果
+
+SELECT IF ('10>5','大','小') 结果
+
+SELECT last_name,commission_pct,IF (commission_pct IS NULL,'haha ','hehe') FROM employees
+
+#case 函数
+#使用一：
+# case
+# when 常亮1 then 值或者语句1;
+#.......
+#else 要显示的值或者语句n；
+
+#案例 查询员工的工资
+#要求 部门号=30 工资1.1倍
+# 部门号=40 工资1.2倍
+#  部门号=50 工资1.3倍
+SELECT salary  原始工资,department_id,
+CASE department_id
+WHEN 30 THEN salary*1.1
+WHEN 40 THEN salary*1.2
+WHEN 50 THEN salary*1.3
+ELSE salary
+END AS 新工资
+FROM employees
+
+#案例2 case 多重 if 
+#case
+#when 条件1 then 要显示的值1或者语句
+#when 条件2 then 要显示的值2或者语句
+#。。。。。
+#else 要显示的值N或者语句
+#end
+
+#查询员工的工资情况
+#如果工资大于20000显示A
+#大于15000            B
+#大于10000            C
+#其他                 D
+
+SELECT salary,
+CASE
+WHEN salary>20000 THEN 'a'
+WHEN salary>15000 THEN 'B'
+WHEN salary>10000 THEN 'c'
+ELSE 'd'
+END AS 等级
+FROM employees
+
+
+##########################
+SELECT CONCAT(last_name,'earns',salary,'want',salary*3)
+FROM employees
+WHERE salary=24000
+
+
+#分组函数
+
+/*
+分类 sum求和
+   avg 平均
+   max
+   min
+   count
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+#简单使用
+
+SELECT SUM(salary) FROM employees;
+SELECT AVG(salary)FROM employees;
+SELECT MAX(salary)FROM employees;
+SELECT COUNT(salary) FROM employees;
+
+SELECT SUM(salary),ROUND(AVG(salary),1) FROM employees
+
+
+#特点 ： 分组函数 的参数类型支持哪些类型：
+#sum  avg 一般只用于处理数值型
+#max min count 处理任何类型
+#分组函数都忽略null  sum  avg  max min count
+#可以和 distinct
+SELECT SUM(last_name),AVG(last_name) FROM employees
+
+SELECT MAX(last_name) FROM employees
+#有null
+SELECT COUNT(commission_pct) FROM employees
+#是否忽略null
+SELECT SUM(commission_pct),AVG(commission_pct)FROM employees
+
+#和distinct
+SELECT SUM(DISTINCT salary),SUM(salary) FROM employees
