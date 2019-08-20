@@ -1,0 +1,288 @@
+# @Time : 2019/7/31 17:19 
+
+# @Author : xuzehao
+
+# @File : test1.py 
+
+# Please contact if necessary:835981898@qq.com
+# coding: utf-8
+import re
+import openpyxl
+import os
+import time
+import threading
+time_s=time.time()
+wb=openpyxl.Workbook('匹配后数据.xlsx')
+ws=wb.active
+ws=wb.create_sheet('数据')
+boxhead=['例编号','用例结果','checkmemory','log文件','fial数量','错误信息','错误信息个数','信息错误类型个数','详细信息']
+
+ku=['jump or move depends on uninitialised',
+	'Use of uninitialised value of size',
+	'source and destination overlap',
+	'Invalid or Mismatched',
+	'blocks are definitely lost',
+	'invalid file descriptor for syscall',
+]
+ws.append(boxhead)
+def file_name(file_dir):
+    for root, dirs, files in os.walk(file_dir):
+        root=root+'\\'
+        for i in files:
+            file_single=root+i
+            print(file_single)
+            try:
+                try:
+                    with open(file_single,'r',encoding='utf8') as fl :
+                        fl = fl.read()
+                        fl = re.split('\s\\n', fl)
+
+                except:
+                    with open(file_single, 'rb') as fl:
+                        fl=fl.read().decode("utf-8","ignore")
+                        fl=re.split('\s\\n',fl)
+
+                fl=str(fl)
+
+                i = re.match('[A-Z].*?\(', i).group()
+                i = re.sub('\(', '', i)
+                use_case_number = re.compile('/,').split(str(i))
+                # 用例结果
+                # print(fl)
+                test_result = re.findall('测试结果:(FAIL|ERROR)', fl)
+                test_result = re.sub(r'\\n', '', str(test_result))
+                test_result = re.sub(r'\\', '', str(test_result))
+                test_result = re.sub(' ', '', str(test_result))
+
+                test_result = test_result[2:-2]
+                test_result = re.compile('/,').split(test_result)
+                # checkmemory信息
+                result_FAIL = re.findall('Step:CheckMemory.*?(FAIL|PASS)', fl)
+
+                # if result_FAIL==['FAIL']:
+                file_number = len(re.findall('Step Result:FAIL', fl))-1
+                if file_number<0:
+                    file_number=0
+                pat = '''\s more /data/valgrind_log/.*? (.*?    ~ #)'''
+                fail_mission=re.findall(pat,fl)
+                # print(type(fail_mission))
+                if fail_mission !=[]:
+                    a=[]
+                    fail_mission=fail_mission[0]
+                    a.append(fail_mission)
+                    fail_mission=a
+                    fail_mission = str(fail_mission).replace("\'", "")
+                    fail_mission = str(fail_mission).replace("\\", "")
+                    fail_mission = str(fail_mission).replace("\"", "")
+                    fail_mission = str(fail_mission).replace(",", "")
+                    fail_mission = str(fail_mission).replace(r"\d", "")
+                    fail_mission = str(fail_mission).replace("     ", "\n")
+                    fail_mission = str(fail_mission).replace("[", "")
+                    fail_mission = str(fail_mission).replace("]", "")
+                if fail_mission==[]:
+                    #print(fl)
+                    a = []
+
+                    pat='''\s cat /data/valgrind_log/.*? (.*?    ~ #)'''
+
+                    fail_mission = re.findall(pat, fl)
+                    if fail_mission==[]:
+                        fail_mission=['']
+                    #print(fail_mission)
+                    fail_mission=fail_mission[0]
+                    a.append(fail_mission)
+                    fail_mission = a
+
+                    #print(fail_mission)
+                    fail_mission = str(fail_mission).replace(r"\\n", "\n")
+                    fail_mission = str(fail_mission).replace(r"\',", "\n")
+                    fail_mission = str(fail_mission).replace(r'", ', "\n")
+                    fail_mission = str(fail_mission).replace(",", "")
+                    fail_mission = str(fail_mission).replace(r"     ", "\n")
+                    fail_mission = str(fail_mission).replace("\"", "")
+                    fail_mission = str(fail_mission).replace("\'", "")
+                    fail_mission = str(fail_mission).replace("\\", "")
+                    fail_mission = str(fail_mission).replace("[", "")
+                    fail_mission = str(fail_mission).replace("]", "")
+                    #print(fail_mission)
+                # fail_mission = eval(str(fail_mission))
+                # fail_mission = "\n".join(fail_mission)
+                # print(fail_mission)
+                #     #file_number = len(re.findall('Step Result:FAIL', fl))-1
+                #     #if file_number<0:
+                #     #    file_number=0
+                #file_number = list(str(file_number))
+                #print(file_number)
+
+                # rm -rf /data/valgrind_log/ log文件
+                if result_FAIL!=[]:
+                    log = re.findall(r'rm -rf /data/valgrind_log/(.*?)~ #', fl)
+                    #print(log)
+                    if log!=[]:
+                        log=re.match('.*?\.log',str(log)).group()
+                        #print(log)
+                        log = re.sub(r'\\n', '', str(log))
+                        log = re.sub(r'\\', '', str(log))
+                        log = log[2:]
+
+                        log = re.compile('/,').split(log)
+                    if log == []:
+                        log = ['NA']
+
+                    # 错误信息
+                    if result_FAIL == ['FAIL']:
+                        result_res = re.findall('日志中存在以下信息(.*?)结果判断', fl)
+
+                        result_res = re.sub(r'\\n', '', str(result_res))
+                        result_res = re.sub(r'\\', '', str(result_res))
+                        result_res = result_res[6:-2]
+                        result_res = re.compile('/,').split(result_res)
+
+                    elif result_FAIL == None or result_FAIL == ['PASS']:
+                        result_res = ['NA']
+
+
+                    if test_result==['']:
+
+                        with open(file_single, 'rb') as fl_se:
+                            fl_se = fl_se.read().decode("gbk", "ignore")
+                            fl_se = re.split('\s\\n', fl_se)
+                        fl_se=str(fl_se)
+                        test_result = re.findall('测试结果:(FAIL|ERROR)', fl_se)
+                        test_result = re.sub(r'\\n', '', str(test_result))
+                        test_result = re.sub(r'\\', '', str(test_result))
+                        test_result = re.sub(' ', '', str(test_result))
+
+                        test_result = test_result[2:-2]
+                        test_result = re.compile('/,').split(test_result)
+                        #print(test_result)
+                        # checkmemory信息
+                        result_FAIL = re.findall('Step:CheckMemory.*?(FAIL|PASS)', fl_se)
+                        #print(result_FAIL)
+                        pat = '''\s more /data/valgrind_log/.*? (.*?    ~ #)'''
+                        a=[]
+                        fail_mission = re.findall(pat, fl_se)
+                        if fail_mission==[]:
+                            fail_mission=['']
+                        fail_mission=fail_mission[0]
+                        a.append(fail_mission)
+                        fail_mission =a
+                        # print(type(fail_mission))
+                        if fail_mission != []:
+                            #print(fail_mission)
+                            fail_mission = str(fail_mission).replace("\'", "")
+                            fail_mission = str(fail_mission).replace("\\", "")
+                            fail_mission = str(fail_mission).replace("\"", "")
+                            fail_mission = str(fail_mission).replace(",", "")
+                            fail_mission = str(fail_mission).replace(r"\d", "")
+                            fail_mission = str(fail_mission).replace("     ", "\n")
+                            fail_mission = str(fail_mission).replace("[", "")
+                            fail_mission = str(fail_mission).replace("]", "")
+                        if fail_mission == []:
+
+                            a=[]
+                            pat = '''\s cat /data/valgrind_log/.*? (.*?    ~ #)'''
+                            fail_mission = re.findall(pat, fl_se)[0]
+                            a.append(fail_mission)
+                            fail_mission = a
+
+                            fail_mission = str(fail_mission).replace(r"\\n", "\n")
+                            fail_mission = str(fail_mission).replace(r"\',", "\n")
+                            fail_mission = str(fail_mission).replace(r'", ', "\n")
+                            fail_mission = str(fail_mission).replace(",", "")
+                            fail_mission = str(fail_mission).replace(r"     ", "\n")
+                            fail_mission = str(fail_mission).replace("\"", "")
+                            fail_mission = str(fail_mission).replace("\'", "")
+                            fail_mission = str(fail_mission).replace("\\", "")
+                            fail_mission = str(fail_mission).replace("[", "")
+                            fail_mission = str(fail_mission).replace("]", "")
+                        # fail_mission = re.findall('[more]|[cat] /data/valgrind_log/.*? (.*?)~ #', fl)
+                        # print(fail_mission)
+                        # rm -rf /data/valgrind_log/ log文件
+                        log = re.findall('rm -rf /data/valgrind_log/(.*?)~ #', fl_se)
+                        if log != []:
+                            log = re.match('.*?\.log', str(log)).group()
+                            # print(log)
+                            log = re.sub(r'\\n', '', str(log))
+                            log = re.sub(r'\\', '', str(log))
+                            log = log[2:]
+
+                            log = re.compile('/,').split(log)
+                        if log==[]:
+                            log=['NA']
+
+                        # 错误信息
+                        if result_FAIL == ['FAIL']:
+                            result_res = re.findall('日志中存在以下信息(.*?)结果判断', fl_se)
+                            #print(fl_se)
+
+                            result_res = re.sub(r'\\n', '', str(result_res))
+                            result_res = re.sub(r'\\', '', str(result_res))
+                            result_res = result_res[6:-2]
+                            result_res = re.compile('/,').split(result_res)
+                        elif result_FAIL == None or result_FAIL == ['PASS']:
+                            result_res = ['NA']
+                    if result_FAIL==[]:
+                        result_FAIL=['CheckMemory不存在']
+                    #错误信息换行
+                    # print(result_res)
+                    # print(type(result_res))
+                    #print(result_res)
+                    result_res = str(result_res).replace("\"", "\'")
+                    result_res = str(result_res).replace("\'", "")
+                    result_res = str(result_res).replace(",", "\n")
+                    result_res = str(result_res).replace("[", "\n")
+                    result_res = str(result_res).replace("]", "\n")
+                    #print(result_res)
+
+                    # print(result_res)
+                    # print(type(result_res))
+                    #错误数
+                    lenn=0
+                    len_all=0
+                    for iii in range(0, 6):
+                        if re.findall(ku[iii], result_res) != []:
+                            lenn=len(re.findall(ku[iii], result_res))
+                            len_all=len_all+lenn
+                    #错误类型数
+                    time=0
+                    for ii in range(0, 6):
+                        if re.findall(ku[ii], result_res) != []:
+                            #print(type(time))
+                            time = time + 1
+                            #print(type(time))
+                    time=str(time)
+                    #print(type(time))
+
+                    report=use_case_number+test_result+result_FAIL+log
+                    report.append(file_number)
+                    report.append(result_res)
+                    report.append(len_all)
+                    report.append(time)
+                    report.append(fail_mission)
+                    print(i+'正在写入Excel文件.....')
+                    ws.append(report)
+                else:
+                    result_FAIL=['没有开启CheckMemory']
+                    log=['NA']
+                    result_res=['NA']
+                    test_result=['ERROR']
+                    file_number=['NA']
+                    time=['NA']
+                    fail_mission=['NA']
+                    len_all=['NA']
+                    rp=use_case_number+test_result+result_FAIL+log+file_number+result_res+len_all+time+fail_mission
+                    ws.append(rp)
+            except UnicodeDecodeError:
+                i=re.match('[A-Z].*?\(',i).group()
+                i=re.sub('\(','',i)
+                report = re.compile('/,').split(str(i))
+                print(str(report)+'编码错误')
+                ws.append(report)
+#file_name(input('请输入文件路径：'))
+if __name__=='__main__':
+    file_name('C:\\Users\\xuzehao\\PycharmProjects\\untitled3\\11111')
+    #file_name('C:\\Users\\xuzehao\\PycharmProjects\\untitled3\\1')
+    wb.save('test.xlsx')
+    time_e=time.time()
+    print('运行时间'+str(time_e-time_s))
