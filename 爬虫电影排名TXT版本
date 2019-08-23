@@ -1,13 +1,21 @@
-# @Time : 2019/4/11 15:18 
+# @Time : 2019/8/21 16:25 
 
 # @Author : xuzehao
 
-# @File : 4_11.py 
+# @File : pachong1.py 
+
+# Please contact if necessary:835981898@qq.com
+
+
+# @Author : xuzehao
+
+# @File : 4_11.py
 
 # Please contact if necessary:835981898@qq.com
 import requests
 import re
 import json
+import time
 def get_one(url):
     header={
         'User - Agent': 'Mozilla / 5.0(Windows NT 10.0 WOW64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 70.0.3538.25Safari / 537.36Core / 1.70.3722.400QQBrowser / 10.5.3776.400'
@@ -17,16 +25,6 @@ def get_one(url):
         return rep.text
     return None
 def get_parse(html):
-    ''' <div class="movie-item-info">
-        <p class="name"><a href="/films/1203" title="霸王别姬" data-act="boarditem-click" data-val="{movieId:1203}">霸王别姬</a></p>
-        <p class="star">
-                主演：张国荣,张丰毅,巩俐
-        </p>
-        <p class="releasetime">上映时间：1993-01-01</p>
-            </div>
-    <div class="movie-item-number score-num">
-<p class="score"><i class="integer">9.</i><i class="fraction">5</i></p>
-    </div>'''
     pat=re.findall('<div class="movie-item-info">.*?title="(.*?)" data.*?<p class="star">'
                    '(.*?)</p>.*?<p class="releasetime">(.*?)</p>.*?<i class="integer">'
                    '(.*?)</i><i class="fraction">(.*?)</i></p> ',html,re.S)
@@ -39,10 +37,14 @@ def get_parse(html):
         }
 def wr_to_fail(self):
     with open ('paiming.txt','a',encoding='utf-8') as f:
-        f.write(json.dump(self,ensure_ascii=False) +'\n')
-def main():
-    url='https://maoyan.com/board/4'
+        f.write(json.dumps(self,ensure_ascii=False) +'\n')
+def main(offset):
+    url='https://maoyan.com/board/4?offset='+str(offset)
     html=get_one(url)
     for a in get_parse(html):
         print(a)
-main()
+        wr_to_fail(a)
+if __name__ == '__main__':
+    for i in range(10):
+        main(offset=i*10)
+        time.sleep(2)
