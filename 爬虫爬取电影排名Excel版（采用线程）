@@ -1,0 +1,61 @@
+# @Time : 2019/8/21 16:25 
+
+# @Author : xuzehao
+
+# @File : pachong1.py 
+
+# Please contact if necessary:835981898@qq.com
+
+
+# @Author : xuzehao
+
+# @File : 4_11.py
+
+# Please contact if necessary:835981898@qq.com
+import requests
+import re
+import json
+import time
+import openpyxl
+import threading
+def get_one(url):
+    header={
+        'User - Agent': 'Mozilla / 5.0(Windows NT 10.0 WOW64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 70.0.3538.25Safari / 537.36Core / 1.70.3722.400QQBrowser / 10.5.3776.400'
+    }
+    rep=requests.get(url,headers=header)
+    if rep.status_code==200:
+        return rep.text
+    return None
+def get_parse(html):
+    pat=re.findall('<div class="movie-item-info">.*?title="(.*?)" data.*?<p class="star">'
+                   '(.*?)</p>.*?<p class="releasetime">(.*?)</p>.*?<i class="integer">'
+                   '(.*?)</i><i class="fraction">(.*?)</i></p> ',html,re.S)
+    for i in pat:
+        yield[
+            i[0],
+            i[1].strip()[3:],
+            i[2][5:],
+            i[3]+i[4]
+        ]
+def wr_to_fail(self):
+    with open ('paiming.txt','a',encoding='utf-8') as f:
+        f.write(json.dumps(self,ensure_ascii=False) +'\n')
+def main(offset):
+
+    url='https://maoyan.com/board/4?offset='+str(offset)
+    html=get_one(url)
+    for a in get_parse(html):
+        print(a)
+        ws.append(a)
+if __name__ == '__main__':
+    wb = openpyxl.Workbook('paiming.xlsx')
+    wb.active
+    ws = wb.create_sheet('电影排名和评分')
+    title = [ '电影名', '主演', '上映时间' + '评分']
+    ws.append(title)
+    for i in range(10):
+        th=threading.Thread(target=main(i*10))
+        th.start()
+        time.sleep(2)
+        th.join()
+    wb.save('paiming.xlsx')
