@@ -1,0 +1,61 @@
+# @Time : 2019/6/6 13:35
+
+# @Author : xuzehao
+
+# @File : 4-12.py
+
+#Please contact if necessary:835981898@qq.com
+#coding=utf-8
+import re
+import requests
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from urllib.parse import quote
+from pyquery import PyQuery as pq
+import pymongo
+browesr=webdriver.Chrome()
+wait=WebDriverWait(browesr,10)
+keyword='ipad'
+def index_page(page):
+    print(page)
+    try:
+        url='https://s.taobao.com/search?q='+quote(keyword)
+        browesr.get(url)
+        if page>1:
+            input=wait.until(
+                EC.presence_of_element_located((By.CSS_SELECTOR,'#mainsrp-pager div.form > input'))
+            )
+            submit=wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,'#mainsrp-pager div.form > '
+                                                                              'span.btn.J_Submit'))
+            )
+            input.clear()
+            input.send_keys(page)
+            submit.click()
+        wait.until(
+            EC.text_to_be_present_in_element((By.CSS_SELECTOR,'#mainsrp-pager li.item.active >span'),str(page))
+        )
+        wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, '.m-itemlist .item .item'))
+        )
+        get_products()
+    except TimeoutException:
+        index_page(page )
+def get_products():
+    html=browesr.page_source
+    doc=pq(html)
+    items=doc('mainsrp-itemlist .items .item').items()
+    for item in items:
+        product={
+            'image':item.find('.pic .img').attr('data-src'),
+            'price': item.find('.price').text(),
+            'deal': item.find('.deal_cnt').text(),
+            'title': item.find('.tiele').text(),
+            'shop': item.find('.shop').text(),
+            'location': item.find('.location').text(),
+        }
+        print(product)
+        save_to_mango()
+def save_to_mango():
