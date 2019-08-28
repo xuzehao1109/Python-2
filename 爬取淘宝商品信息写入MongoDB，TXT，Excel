@@ -1,0 +1,91 @@
+# @Time : 2019/8/28 13:55 
+
+# @Author : xuzehao
+
+# @File : pa4.py 
+
+# Please contact if necessary:835981898@qq.comfrom
+
+import re
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from pyquery import PyQuery as pq
+import csv
+MONGO_URL='localhost'
+MONGO_DB='taobao'
+MONGO_TABLE='products'
+import pymongo
+client=pymongo.MongoClient(MONGO_URL)
+db=[MONGO_DB]
+browers=webdriver.Chrome()
+wait=WebDriverWait(browers,10)
+def search():
+    try:
+        browers.get('https://www.taobao.com')
+        input=wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,'#q')))
+        submit=wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR,'#J_TSearchForm > div.search-button > button')))
+        input.send_keys('iphone')
+        submit.click()
+        totle=wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,'#mainsrp-pager > div > div > div > div.total')))
+        get_products()
+        return totle.text
+    except TimeoutException:
+        search()
+def next_page(page):
+    try:
+        input = wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, '#mainsrp-pager > div > div > div > div.form > input')))
+        submit = wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, '#mainsrp-pager > div > div > div > div.form > span.btn.J_Submit')))
+        input.clear()
+        input.send_keys(page)
+        submit.click()
+        wait.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR,'#mainsrp-pager > div > div > div > ul > li.item.active > span'),str(page)))
+        get_products()
+    except TimeoutException:
+        next_page(page)
+def get_products():
+    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,"#mainsrp-itemlist .items .item")))
+    html=browers.page_source
+    doc=pq(html)
+    items=doc('#mainsrp-itemlist .items .item').items()
+    for item in items:
+        product={
+            'image':item.find('.pic .img').attr('src'),
+            'price':item.find('.price').text(),
+            'deal':item.find('.deal-cnt').text(),
+            'title':item.find('.tiele').text(),
+            'shop':item.find('.shop').text(),
+            'location':item.find('.location').text()
+        }
+        print(product)
+        save_to_mongo(product)
+        save_to_txt(product)
+        save_to_csv(product)
+def save_to_mongo(reselt):
+    try:
+        if db[MONGO_TABLE].insert(reselt):
+            print('写入mongo成功',reselt)
+    except Exception:
+        print('写入MONGO失败',reselt)
+def save_to_txt(result):
+    with open('result.txt','a',encoding='utf8') as f:
+        f.write(str(result))
+        print('正在写入txt文件')
+def save_to_csv(result):
+    with open('result.csv','a',encoding='utf8') as csvfile:
+        writer=csv.writer(csvfile)
+        writer.writerow(result)
+def main():
+    total=search()
+    total=int(re.compile('(\d+)').search(total).group(1))
+    for i in range(2,total+1):
+        next_page(i)
+
+if __name__ == '__main__':
+    main()
