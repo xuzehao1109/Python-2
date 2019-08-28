@@ -16,9 +16,22 @@ from selenium.webdriver.support.wait import WebDriverWait
 from urllib.parse import quote
 from pyquery import PyQuery as pq
 import pymongo
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from urllib.parse import quote
+from pyquery import PyQuery as pq
+import pymongo
 browesr=webdriver.Chrome()
 wait=WebDriverWait(browesr,10)
 keyword='ipad'
+MONGO_URL='localhost'
+MONGO_DB='taobao'
+MONGO_COLLECTION='products'
+client=pymongo.MongoClient(MONGO_URL)
+db=client[MONGO_DB]
 def index_page(page):
     print(page)
     try:
@@ -42,7 +55,9 @@ def index_page(page):
         )
         get_products()
     except TimeoutException:
+        print('爬取失败，再试一次')
         index_page(page )
+
 def get_products():
     html=browesr.page_source
     doc=pq(html)
@@ -57,5 +72,16 @@ def get_products():
             'location': item.find('.location').text(),
         }
         print(product)
-        save_to_mango()
-def save_to_mango():
+        save_to_mango(product)
+def save_to_mango(result):
+    try:
+        if db[MONGO_COLLECTION].insert(result):
+            print('正在写入')
+    except Exception:
+        print('写入失败')
+max_page=100
+def main():
+    for i in range(1,max_page+1):
+        index_page(i)
+if __name__ == '__main__':
+    main()
