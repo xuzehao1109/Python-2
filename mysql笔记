@@ -492,7 +492,256 @@ FROM employees
 WHERE commission_pct IS NOT NULL
 GROUP BY manager_id
 
-#
+#SELECT * FROM employees
+
+
+#DML语言
+#插入语
+/*
+insert into 表名 列名....可多个
+values(值....)；
+插入的值的类型要和插入的一致或者兼容
+
+
+
+
+
+
+
+*/
+SELECT * FROM beauty
+INSERT INTO beauty(id,NAME,sex,borndate,phone,photo,boyfriend_id)
+VALUES(13,'尤','女','1990','199979',NULL,'2');
+
+#可以为null的如何插入值
+#不为null必须插入值
+#方式1
+INSERT INTO beauty(id,NAME,sex,borndate,phone,photo,boyfriend_id)
+VALUES(13,'尤','女','1990','199979',NULL,'2');
+#方式2
+INSERT INTO beauty(id,NAME,sex,borndate,phone,boyfriend_id)
+VALUES(14,'尤尤','女','1990-08-17','199979','2');
+
+#列的顺序可以调换   要和values对应
+INSERT INTO beauty(NAME,id)
+VALUES('哦','15')
+#可以省略列名 默认所有列
+#列的顺序和表中是一致的
+INSERT INTO beauty
+VALUES(19,'张飞','难',NULL,'119',NULL,'3')
+
+#方式2 
+INSERT INTO 
+SET 列名=值
+
+INSERT INTO beauty
+SET id=20,NAME='尤星宇'
+
+INSERT INTO beauty
+SET id =21,sex='女'
+
+#方式一支持一次插入多行
+INSERT INTO beauty
+VALUES(22,'张飞','难',NULL,'119',NULL,'3'),
+(32,'张飞','难',NULL,'119',NULL,'3')
+,(24,'张飞','难',NULL,'119',NULL,'3')
+
+#方式2一次只能插入一行
+
+#方式1支持子查询
+INSERT INTO beauty(id,NAME,phone)
+SELECT 26,'才','45646512'
+
+INSERT INTO beauty(id,NAME,phone)
+SELECT id,boyname ,'15478'FROM boys WHERE id <15
+
+#修改语句
+#修改单表
+#修改多表
+
+UPDATE SET
+WHERE
+#修改beauty中姓唐的电话
+UPDATE beauty SET phone ='1385851111111'
+WHERE NAME LIKE '%双%'
+SELECT * FROM beauty
+
+#修改多表
+#update 表1 别名
+INNER|LEFT|RIGHT|JOIN 表2 别名
+ON 连接条件 
+SET。。。。
+WHERE。。。。
+
+
+#案例 修改多表的记录
+修改张无忌的女朋友的手机号114
+
+UPDATE boys bo
+INNER JOIN beauty b ON bo.id=b.boyfriend_id
+SET b.phone='114'
+WHERE bo.boyname='张无忌'
+SELECT * FROM beauty	
+
+修改没有男朋友的女生的男朋友的编号为2
+UPDATE boys bo
+RIGHT JOIN beauty b ON bo.id=b.boyfriend_id
+SET b.boyfriend_id=2
+WHERE bo.id IS NULL 
+
+方式1 删除
+DELETE FROM 表 WHERE 一删就是整行
+可以单表也可以多表
+DELETE 表1 表2
+FROM 表1 
+INNER LEFT RIGHT JOIN 表2 ON 连接条件
+WHERE
+
+方式2 多表杀出TRUNCATE TABLE 表名 不能加WHERE 清空删除
+
+#方式1
+DELETE FROM beauty WHERE phone LIKE '%9'
+SELECT * FROM beauty
+
+DELETE b FROM beauty b INNER JOIN boys bo 
+ON b.boyfriend_id=bo.id
+WHERE bo.boyName='张无忌'
+
+SELECT *FROM beauty
+SELECT * FROM boys
+
+DELETE b,bo
+FROM beauty b INNER JOIN boys bo 
+ON b.boyfriend_id=bo.id
+WHERE bo.boyName='黄晓明'
+
+#方式2
+TRUNCATE TABLE boys 
+
+方式1和2的区别
+DELETE 可以加WHERE
+TRUNCATE 不能加
+TRUNCATE效率高
+TRUNCATE格式化删除 自增张值从1开始
+DELETE有返回值，TRUNCATE无返回值
+DELETE可以回滚，TRUNCATE不能回滚
+
+#DDL语言 库和表的管理
+
+
+创建修改删除
+创建 CREATE     [IF NOT EXISTS]
+修改 ALTER
+删除 DROP
+
+库的管理
+库的创建
+CREATE DATABASE 库名
+
+CREATE DATABASE IF NOT EXISTS books
+
+库的修改
+更改库的字符集
+ALTER DATABASE books CHARACTER SET gbk
+
+库的删除
+DROP  DATABASE IF EXISTS books 
+
+表的管理
+表的创建
+CREATE TABLE 表名（列名 列的类型【(长度 可选) 约束】，
+		   列名 列的类型【(长度 可选) 约束】）
+CREATE DATABASE IF NOT EXISTS books
+
+CREATE TABLE book(id INT,
+	bname VARCHAR(20),
+	price DOUBLE,
+	authorID INT,
+	piblishDate DATETIME)
+DESC book
+
+CREATE TABLE author(
+		id INT,
+		an_name VARCHAR(20)
+)
+
+表的修改
+修改列名
+修改列的类型和约束
+添加列 删除列
+
+#修改列名
+ALTER TABLE book CHANGE COLUMN publishdate pubdate DATETIME
+
+DESC book
+
+#修改列的类型
+ALTER TABLE book MODIFY COLUMN pubdate TIMESTAMP
+
+#添加新列
+ALTER TABLE  author ADD COLUMN annuall DOUBLE
+DESC author
+
+#删除列
+ALTER TABLE author DROP COLUMN  annual
+
+#修改表名字
+
+ALTER TABLE author RENAME TO  book_author
+DESC book_author
+
+#表的删除
+DROP TABLE 表名
+DROP TABLE IF EXISTS book_author
+
+SHOW TABLES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
