@@ -698,7 +698,84 @@ SHOW TABLES
 
 
 
+USE books
+SHOW DATABASES
 
+	TINYINT  SMALLINT MEDIUMINT  INT  BIGINT 
+字节        1      2         3        4      8
+
+#如何只是无符号和有符号
+#unsigned 设置为无符号
+#超出范围的值就是临界值
+DROP TABLE IF EXISTS tab_int;
+CREATE TABLE tab_int(
+	t1 INT(7) ZEROFILL ,
+	t2 INT UNSIGNED
+	
+)
+DESC tab_int
+
+INSERT INTO tab_int VALUES(-1254)
+INSERT INTO tab_int VALUES(-12454,-1545)
+INSERT INTO tab_int VALUES(9999999999,-1545)
+INSERT INTO tab_int VALUES(9,-1545)
+SELECT * FROM tab_int
+
+浮点型 会根据插入的精度决定精度
+FLOAT(M,D)
+DOUBLE(M,D)
+
+定点型
+DEC(M,D)
+M代表的是整数部位加小数部位
+D代表小数部位
+如果超过就插入临界值
+
+DROP TABLE IF EXISTS tab_float;
+CREATE TABLE tab_float(
+		fi FLOAT(5,2)
+		,f2 DOUBLE(5,2),
+		f3 DEC(5,2)
+	)
+
+INSERT INTO tab_float VALUES(
+	1523.4,1523.4,1523.4
+)
+SELECT * FROM tab_float
+
+字符型
+CHAR
+VARCHAR
+
+TEXT
+BLOB()
+
+CREATE TABLE tab_char(
+		c1 ENUM('a','b','c')#枚举
+	
+	
+	
+)
+
+INSERT INTO tab_char VALUES('a');
+INSERT INTO tab_char VALUES('b');
+INSERT INTO tab_char VALUES('c');
+INSERT INTO tab_char VALUES('A');
+INSERT INTO tab_char VALUES('m');
+
+SELECT * FROM tab_char
+
+CREATE TABLE tab_set(
+	s1 SET('a','b','c')
+)
+
+INSERT INTO tab_set VALUES('a');
+INSERT INTO tab_set VALUES('a,b,c');
+INSERT INTO tab_set VALUES('c,v');
+INSERT INTO tab_set VALUES('A,b,b,b');
+INSERT INTO tab_set VALUES('m');
+
+SELECT * FROM tab_set
 
 
 
