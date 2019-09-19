@@ -777,6 +777,244 @@ INSERT INTO tab_set VALUES('m');
 
 SELECT * FROM tab_set
 
+USE books
+SHOW DATABASES
+
+	TINYINT  SMALLINT MEDIUMINT  INT  BIGINT 
+字节        1      2         3        4      8
+
+#如何只是无符号和有符号
+#unsigned 设置为无符号
+#超出范围的值就是临界值
+DROP TABLE IF EXISTS tab_int;
+CREATE TABLE tab_int(
+	t1 INT(7) ZEROFILL ,
+	t2 INT UNSIGNED
+	
+)
+DESC tab_int
+
+INSERT INTO tab_int VALUES(-1254)
+INSERT INTO tab_int VALUES(-12454,-1545)
+INSERT INTO tab_int VALUES(9999999999,-1545)
+INSERT INTO tab_int VALUES(9,-1545)
+SELECT * FROM tab_int
+
+浮点型 会根据插入的精度决定精度
+FLOAT(M,D)
+DOUBLE(M,D)
+
+定点型
+DEC(M,D)
+M代表的是整数部位加小数部位
+D代表小数部位
+如果超过就插入临界值
+
+DROP TABLE IF EXISTS tab_float;
+CREATE TABLE tab_float(
+		fi FLOAT(5,2)
+		,f2 DOUBLE(5,2),
+		f3 DEC(5,2)
+	)
+
+INSERT INTO tab_float VALUES(
+	1523.4,1523.4,1523.4
+)
+SELECT * FROM tab_float
+
+字符型
+CHAR
+VARCHAR
+
+TEXT
+BLOB()
+
+CREATE TABLE tab_char(
+		c1 ENUM('a','b','c')#枚举
+	
+	
+	
+)
+
+INSERT INTO tab_char VALUES('a');
+INSERT INTO tab_char VALUES('b');
+INSERT INTO tab_char VALUES('c');
+INSERT INTO tab_char VALUES('A');
+INSERT INTO tab_char VALUES('m');
+
+SELECT * FROM tab_char
+
+CREATE TABLE tab_set(
+	s1 SET('a','b','c')
+)
+
+INSERT INTO tab_set VALUES('a');
+INSERT INTO tab_set VALUES('a,b,c');
+INSERT INTO tab_set VALUES('c,v');
+INSERT INTO tab_set VALUES('A,b,b,b');
+INSERT INTO tab_set VALUES('m');
+
+SELECT * FROM tab_set
+
+CREATE TABLE tab_date(
+	t1 DATETIME,
+	t2 TIMESTAMP
+)
+INSERT INTO tab_date VALUES(NOW(),NOW())
+
+SELECT * FROM tab_date
+
+SHOW VARIABLES LIKE 'time_zone'
+
+SET time_zone='+8:00'
+DATE 只保存日期
+TIME 只保存时间
+YEAR 只保存年
+
+DATETIME  保存时间和日期   8字节   不受时区影响
+TIMESTAMP 保存时间和日期   4字节   受时区影响
+
+SELECT 列表
+FROM 表
+连接类型 JOIN 
+ON 连接条件
+WHERE 筛选条件
+GROUP BY 分组
+HAVING 筛选
+ORDER BY 排序
+LIMIT 分页
+
+
+插入：
+INSERT INTO 表名 VALUES 值
+插入的类型和字段类型要一直或者兼容
+只要保证值和类型一一对应
+加入表中有NULL的字段可以：字段的值都不写或者值使用NULL
+字段和值的个数必须一致
+字段名可以省略 默认全部
+
+INSERT INTO 表名 SET 字段=值......
+
+
+插入多行
+INSERT  INTO 表名【字段名...】 VALUES (值，...)（值...）
+子查询：
+INSERT INTO 表名 查询...
+
+修改单表
+
+UPDATE 表名 SET 字段=值，字段=值
+
+UPDATE 表1  LEFT |RIGHT|INNER| 
+ON 连接条件
+SET 字段=值，字段=值
+where....
+
+删除：
+删除单表DELETE FROM 表名 WHERE 
+
+删除多表 级联删除：
+DELETE 表1，表2 
+ LEFT |RIGHT|INNER| 
+ON 连接条件
+SET 字段=值，字段=值
+where....
+limit....
+
+TRUNCATE TABLE 表名
+
+两种删除的区别
+TRUNCATE 删除后，在插入标识列从1开始
+DELETE 删除后，再插入标识列从短点开始
+
+DELETE可以添加筛选
+TRUNCATE没有返回值，不能回滚
+
+创建库
+CREATE DATABASE IF NOT EXISTS 库名 
+
+修改库名
+ALTER DATABASE 库名 
+
+删除库
+DROP DATABASE  IF EXISTS 库名
+
+创建表
+CREATE TABLE IF NOT EXISTS 表名（
+字段名 字段类型。。。。。
+
+）
+
+添加列
+ALTER TABLE 表名 ADD COLUMN 列名 类型【frist|AFTER字段名】
+
+修改列的约束类型
+ALTER TABLE 表名 MODIFY COLUMN 列名 新类型
+
+修改列名
+ALTER TABLE 表名 CHANGE COLUMN 旧名 新名 类型
+
+删除列 
+ALTER TABLE 表名 DROP COLUMN 列名
+
+修改表名
+ALTER TABLE 表名 RENAME 【TO】新名
+
+删除表
+DROP TABLE IF EXISTS 表名
+
+复制表
+复制表的结构
+CREATE TABLE 新表 LIKE 旧表
+复制表的类型加数据
+CREATE TABLE 表名 SELECT 查询列表 FROM 旧表【WHERE ...】
+
+数据类型
+数值型
+字符型
+日期型
+
+
+常见约束
+CREATE TABLE biaoming(
+	字段名 类型 约束
+)
+
+六大约束
+非空约束 ：NOT NULL  用于保证该字段的值不能为空
+默认值：DEFAULT 保证有默认值
+主键： PRIMARY KEY 保证唯一性
+唯一，可以玩空：UNIQUE 唯一性，可以为空
+检查：CHECK（mysql不支持）
+外健：FOREIGN KEY 限制两个表的关系，保证该字段值必须来自主表的关联列的值
+			在从表添加约束，用于引用主表找中的值
+
+在创建和修改表时添加
+
+列级约束 ：六大约束语法上都支持，但外键约束没有效果
+ 
+表级约束：除了非空、默认其他都支持
+
+创建表时添加约束
+添加列级约束
+CREATE DATABASE students
+USE students
+CREATE TABLE stuinfo(
+	id INT(15) PRIMARY KEY ,#主键,
+	stuname VARCHAR(20) NOT NULL ,#非空，
+	gender CHAR(1) CHECK(gender='男'OR gender='女'),
+	seat INT UNIQUE ,#唯一,
+	age INT DEFAULT 18 ,#默认
+	majorid INT  REFERENCES major(id)
+)
+SELECT *FROM stuinfo
+DESC stuinfo
+
+CREATE TABLE major(
+	id INT PRIMARY KEY ,
+	majorname VARCHAR(20)
+)
+
 
 
 
