@@ -1,0 +1,32 @@
+# @Time : 2019/9/24 15:11 
+
+# @Author : xuzehao
+
+# @File : t13.py 
+
+# Please contact if necessary:835981898@qq.com
+
+
+
+test = ['0222019092010', '7912019092010', '7912019092009', '7912019092006', '7912019092011', '0272019092011',
+        '8982019092010', '8982019092011', '8712019092010']
+# 如何将列表中元素前3位相同的元素提取出来
+# 期望得到结果
+li = ['7912019092010', '7912019092009', '7912019092006', '7912019092011', '8982019092010', '8982019092011', ]
+
+
+
+li_1=[]
+li_2=[]
+sat=[]
+def get_3_number():
+    for i in range(len(test)):
+        number=test[i][0:3]
+        sat.append(number)
+    for i in range(len(test)):
+        if sat.count(sat[i])==1:
+            li_1.append(test[i])
+        if sat.count(sat[i])>1:
+            li_2.append(test[i])
+    print(li_1, li_2)
+get_3_number()
