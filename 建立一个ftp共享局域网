@@ -1,0 +1,33 @@
+# @Time : 2019/9/27 15:41 
+
+# @Author : xuzehao
+
+# @File : t15.py 
+
+# Please contact if necessary:835981898@qq.com
+
+
+
+from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.servers import FTPServer
+
+# 实例化DummyAuthorizer来创建ftp用户
+authorizer = DummyAuthorizer()
+
+# 参数：用户名，密码，目录，权限
+authorizer.add_user('xuzehao', 'xuzehao', 'C:\\Users\\xuzehao\\Desktop', perm='elradfmwMT')
+authorizer.add_user('ruijie', 'ruijie', 'C:\\Users\\xuzehao\\Desktop', perm='elradfmwMT')
+# 匿名登录
+# authorizer.add_anonymous('/home/nobody')
+
+handler = FTPHandler
+
+handler.authorizer = authorizer
+# 添加被动端口范围
+handler.passive_ports = range(2000, 2333)
+
+# 参数：IP，端口，handler
+# server = FTPServer(('192.168.1.247', 2121), handler)    #外网
+server = FTPServer(('172.30.61.124', 2121), handler)
+server.serve_forever()
