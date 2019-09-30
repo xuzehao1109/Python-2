@@ -1,0 +1,23 @@
+import os
+import time
+work=[]
+unwork=[]
+ip_ad='172.29.111.1'
+def main():
+    for i in range(256):
+        ip=ip_ad[0:11]+str(i)
+        ip_ping(ip)
+        if a ==0:
+            work.append(ip)
+        if a !=0:
+            unwork.append(ip)
+def ip_ping(ip):
+    global a
+    a = os.system('ping'+' '+ip)
+    return a
+if __name__ == '__main__':
+    t1=time.time()
+    main()
+    print(work,unwork)
+    t2=time.time()
+    print(t2-t1)
