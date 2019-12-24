@@ -114,3 +114,65 @@ def main():
 if __name__ == '__main__':
     主要（）
 ＃版本补充文件名默认输入框
+
+
+V1.03 版本更新透视表
+代码
+# @Time : 2019/12/20 13:53 
+
+# @Author : xuzehao
+
+# @File : excel_select.py 
+
+# Please contact if necessary:835981898@qq.com
+import pandas as pd
+import numpy as np
+import csv
+import tkinter.filedialog
+import tkinter
+import os
+import easygui as eg
+import time
+#文件选择界面
+def ui():
+    global file_path
+    root = tkinter.Tk()    # 创建一个Tkinter.Tk()实例
+    root.withdraw()       # 将Tkinter.Tk()实例隐藏
+    default_dir = r"文件路径"
+    file_path = tkinter.filedialog.askopenfilename(title=u'选择文件', initialdir=(os.path.expanduser(default_dir)))
+    return file_path
+#新文件的文件名
+def newname(file_path):
+    global new_file_name
+    time_ = time.strftime("%Y-%m-%d ", time.localtime())
+    new_file_name=file_path.split('/')
+    new_file_name=time_+new_file_name[-1]
+    new_file_name=eg.enterbox(msg='请输入修改后的文件名', title='excel-select', default=new_file_name, strip=True, image=None, root=None)
+    return new_file_name
+#Excel处理部分
+def excel_(self):
+    df=pd.DataFrame(pd.read_excel(self))#打开表格
+    df = df.loc[(df['执行结果'] == 'PASS')]#删除fail等...
+    df.loc[df['审核结果'] == '审核通过', '审核结果'] = 1#排序
+    df.loc[df['审核结果'] == '审核失败', '审核结果'] = 2#排序
+    df.loc[df['审核结果'] == '未审核', '审核结果'] = 3#排序
+    df.sort_values(by='审核结果',ascending=True,  inplace=True,kind='heapsort')#排序
+    re_row=df.duplicated()#查看重复项
+    no_re_row=df.drop_duplicates(['用例编号'])#删除重复项
+    file = no_re_row.loc[(no_re_row['审核结果'] == 3)].copy()#删除'审核通过','审核失败'...
+    file.loc[file['审核结果'] == 3, '审核结果'] = '未审核'
+    #透析表
+    pibott = pd.pivot_table(file, index=[u'审核人'], values=['用例编号'], aggfunc={'用例编号': len}, fill_value=0)
+    pibott.loc['总计'] = pibott.apply(lambda x: x.sum())
+    with pd.ExcelWriter(new_file_name) as writer:
+        pibott.to_excel(writer, sheet_name='df1')
+        file.to_excel(writer, sheet_name='df2',index=False)
+    # pibott.to_excel(new_file_name,sheet_name='Sheet1')
+    # file.to_excel(new_file_name,sheet_name='Sheet2',index=False)
+def main():
+    file_path=ui()
+    newname(file_path)
+    excel_(file_path)
+    eg.msgbox('处理完成，处理后的文件名为' + '(' + new_file_name + ')')
+if __name__ == '__main__':
+    main()
