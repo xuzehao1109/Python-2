@@ -1,0 +1,58 @@
+# @Time : 2019/11/21 17:26 
+
+# @Author : xuzehao
+
+# @File : t17.py 
+
+# Please contact if necessary:835981898@qq.com
+info='''
+['<DHCP  options=[message-type=discover param_req_list=[1, 3, 6, 12, 15, 28, 31, 33] ']
+--------------------------------------------------------------
+['<DHCP  options=[message-type=offer server_id=10.89.0.1 subnet_mask=255.255.192.0 router=10.89.0.1 broadcast_address=10.89.63.255 name_server=183.221.253.100,211.137.96.205 lease_time=14400 renewal_time=7200 rebinding_time=12600 ']
+--------------------------------------------------------------
+['<DHCP  options=[message-type=request server_id=10.89.0.1 requested_addr=10.89.49.36 param_req_list=[1, 3, 6, 12, 15, 28, 31, 33] ']
+--------------------------------------------------------------
+['<DHCP  options=[message-type=ack server_id=10.89.0.1 subnet_mask=255.255.192.0 router=10.89.0.1 broadcast_address=10.89.63.255 name_server=183.221.253.100,211.137.96.205 lease_time=14400 renewal_time=7200 rebinding_time=12600 ']
+'''
+
+import scapy
+from scapy.all import *
+import re
+from scapy.utils import PcapReader
+packets=rdpcap("dhcp.pcap")
+from scapy.utils import PcapReader
+s = repr(packets[0])
+
+discover=re.findall('.*(<DHCP  options.*?)hostname',s)
+print(discover)
+print('--------------------------------------------------------------')
+offer=re.findall('.*(<DHCP  options.*?)end',repr(packets[1]))
+print(offer)
+print('--------------------------------------------------------------')
+request=re.findall('.*(<DHCP  options.*?)hostname',repr(packets[2]))
+print(request)
+print('--------------------------------------------------------------')
+ack=re.findall('.*(<DHCP  options.*?)end',repr(packets[3]))
+print(ack)
+
+'''['<DHCP  options=[message-type=discover param_req_list=[1, 3, 6, 12, 15, 28, 31, 33] ']
+'''
+def discover_(self):
+    global param_req_list
+    typeinfo=re.findall('message-type=(.*?) ',str(self))
+    if typeinfo!=['discover']:
+        print('discover发包错误')
+    elif typeinfo==['discover']:
+        param_req_list=re.findall('param_req_list=\[(.*?)\] ',str(self))
+        param_req_list=str(param_req_list).replace("\'",'')
+        param_req_list = str(param_req_list).replace(" ", '')
+        print(param_req_list)
+        print(len(param_req_list))
+        if param_req_list==['']:
+            print('握手协议错误')
+        if param_req_list!=['']:
+           if  len(param_req_list) %2!=0:
+               print('握手协议序列号不完整')
+           else:
+               print('discover报文没有错误')
+discover_(discover)
